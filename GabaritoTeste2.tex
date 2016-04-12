@@ -1,0 +1,51 @@
+\documentclass[12pt,a4paper]{article}
+\title{Gabarito - Teste2}
+
+\date{}
+\usepackage{amsmath}
+\usepackage{bbm}
+\usepackage{enumitem}
+\usepackage[utf8]{inputenc}
+
+
+\begin{document}
+\maketitle
+
+\textbf{1.} Considere uma amostra aleatória de tamanho n de uma população com função densidade de probabilidade $$f(x) = \frac{3x^2}{\theta^3} \mathbbm{1}_{[0,\theta]}(x). \, \, \, \theta > 0$$
+
+\begin{itemize}
+	\item[a.] Encontre um estimador de $\theta$ pelo método dos momentos.
+	\item[b.] Calcule a esperança do estimador
+	\item[c.] Calcule o erro quadr\'atico m\'edio do estimador.
+\end{itemize}
+
+\textbf{Solução}
+\bigskip
+
+\textbf{a.} Para encontrar o estimador via dos método dos momentos, precisamos primeiramente encontrar $\mu_1 = E(X)$ (o primeiro momento). Vamos então encontrar $E(X)$. 
+
+Como X é uma v.a. contínua, sua esperança é dada por $$E(X) = \int_{-\infty}^{\infty} xf(x)dx.$$ Como nesse caso $f(x) = \frac{3x^2}{\theta^3} \mathbbm{1}_{[0,\theta]}(x)$, temos então que $$E(X) = \int_{0}^{\theta} x\frac{3x^2}{\theta^3}dx = \left.\left[\frac{3x^4}{\theta^34}\right]\right|_{0}^{\theta} = \frac{3\theta}{4}$$
+
+Dado então que $\mu_1 = E(X) = \frac{3\theta}{4}$ o próximo passo consiste em igualar $\mu_1$ ao primeiro momento amostral $M_1 = \frac{1}{n}\sum_{i=1}^n X_i^1 = \bar{X}$. Portanto, devemos ter então $$\hat{\mu_1} = \bar{X} \, \Rightarrow \frac{3\theta}{4}=\bar{X} \Rightarrow \hat{\theta} = \frac{4\bar{X}}{3}.$$ Ou seja, o estimador de $\theta$ via método dos momentos é \fbox{$\hat{\theta} = \frac{4\bar{X}}{3}$}.
+
+\bigskip
+
+\textbf{b.} Como o nosso estimador é $\hat{\theta} = \frac{4\bar{X}}{3}$, a esperança do estimador, $E(\hat{\theta})$, é $$E(\hat{\theta}) = E(\frac{4\bar{X}}{3}) = \frac{4}{3}E(\bar{X}).$$
+
+Sabemos que $E(\bar{X}) = \frac{1}{n}E(\sum_{i=1}^nX_i) = \frac{1}{n}\sum_{i=1}^nE(X_i)$ e como $X_1, X_2, \dots, X_n$ são iid, $E(\bar{X}) = \frac{1}{n}nE(X) = \frac{3\theta}{4}$. 
+
+Portanto, temos finalmente que $$\fbox{$E(\hat{\theta}) = \dfrac{4}{3}\dfrac{3\theta}{4} = 
+\theta$}$$
+
+\bigskip
+
+\textbf{c.} O erro quadrático médio é definido como $$EQM(\hat{\theta}) = E[(\hat{\theta}-\theta)^2] = Var(\hat{\theta}) + (Vies(\hat{\theta},\theta))^2$$
+
+Mas, nesse caso, $Vies(\hat{\theta},\theta) = E(\hat{\theta}) - \theta = 0$. Ou seja, $EQM(\hat{\theta}) = Var(\hat{\theta})$. 
+
+Como $\hat{\theta} = \frac{4\bar{X}}{3}$, temos que $$Var(\hat{\theta}) = Var(\frac{4\bar{X}}{3}) = \frac{16}{9}Var(\bar{X}) = \frac{16}{9n^2}Var(\sum_{i=1}^nX_i) = \frac{16}{9n}Var(X).$$ Vamos portanto calcular $Var(X) = E(X^2) - [E(X)]^2$. Já sabemos que $E(X) = \frac{3\theta}{4}$, precisamos então só de $E(X^2)$. Mas $$E(X^2) = \int_{0}^{\theta}x^2\frac{3x^2}{\theta^3}dx = \left.\left[\frac{3x^5}{\theta^35}\right]\right|_0^{\theta} = \frac{3\theta^2}{5}.$$
+
+Portanto, $$Var(X) = \frac{3\theta^2}{5} - \left[\frac{3\theta}{4}\right]^2 = \frac{3\theta^2}{5} - \frac{9\theta^2}{16} = \frac{3\theta^2}{80}.$$
+
+Finalmente, então, $$\fbox{$EQM(\theta^2) = \dfrac{16}{9n}\dfrac{3\theta^2}{80} = \dfrac{\theta^2}{15n}$}$$
+\end{document}
