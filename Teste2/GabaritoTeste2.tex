@@ -3,7 +3,6 @@
 
 \date{}
 \usepackage{amsmath}
-\usepackage{bbm}
 \usepackage{enumitem}
 \usepackage[utf8]{inputenc}
 
@@ -11,7 +10,7 @@
 \begin{document}
 \maketitle
 
-\textbf{1.} Considere uma amostra aleatória de tamanho n de uma população com função densidade de probabilidade $$f(x) = \frac{3x^2}{\theta^3} \mathbbm{1}_{[0,\theta]}(x). \, \, \, \theta > 0$$
+\textbf{1.} Considere uma amostra aleatória de tamanho n de uma população com função densidade de probabilidade $$f(x) = \frac{3x^2}{\theta^3} I_{[0,\theta]}(x). \, \, \, \theta > 0$$
 
 \begin{itemize}
 	\item[a.] Encontre um estimador de $\theta$ pelo método dos momentos.
@@ -24,7 +23,7 @@
 
 \textbf{a.} Para encontrar o estimador via dos método dos momentos, precisamos primeiramente encontrar $\mu_1 = E(X)$ (o primeiro momento). Vamos então encontrar $E(X)$. 
 
-Como X é uma v.a. contínua, sua esperança é dada por $$E(X) = \int_{-\infty}^{\infty} xf(x)dx.$$ Como nesse caso $f(x) = \frac{3x^2}{\theta^3} \mathbbm{1}_{[0,\theta]}(x)$, temos então que $$E(X) = \int_{0}^{\theta} x\frac{3x^2}{\theta^3}dx = \left.\left[\frac{3x^4}{\theta^34}\right]\right|_{0}^{\theta} = \frac{3\theta}{4}$$
+Como X é uma v.a. contínua, sua esperança é dada por $$E(X) = \int_{-\infty}^{\infty} xf(x)dx.$$ Como nesse caso $f(x) = \frac{3x^2}{\theta^3} I_{[0,\theta]}(x)$, temos então que $$E(X) = \int_{0}^{\theta} x\frac{3x^2}{\theta^3}dx = \left.\left[\frac{3x^4}{\theta^34}\right]\right|_{0}^{\theta} = \frac{3\theta}{4}$$
 
 Dado então que $\mu_1 = E(X) = \frac{3\theta}{4}$ o próximo passo consiste em igualar $\mu_1$ ao primeiro momento amostral $M_1 = \frac{1}{n}\sum_{i=1}^n X_i^1 = \bar{X}$. Portanto, devemos ter então $$\hat{\mu_1} = \bar{X} \, \Rightarrow \frac{3\theta}{4}=\bar{X} \Rightarrow \hat{\theta} = \frac{4\bar{X}}{3}.$$ Ou seja, o estimador de $\theta$ via método dos momentos é \fbox{$\hat{\theta} = \frac{4\bar{X}}{3}$}.
 
