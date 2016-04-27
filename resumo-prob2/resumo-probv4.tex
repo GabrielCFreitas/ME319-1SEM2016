@@ -1,0 +1,151 @@
+\documentclass[a4paper,10pt]{article} % Formato do documento
+\usepackage[brazil]{babel} % Títulos em português - brasileiro
+\usepackage[utf8]{inputenc} % Acentuação no teclado
+\usepackage{amsthm, amsfonts, amsmath} % Preâmbulos
+%\usepackage[bookmarks]{hyperref} % Hiperlinks e marcadores
+%\usepackage{graphicx} % Imagens
+%\usepackage[export]{adjustbox}%alinhar figuras
+%\usepackage{indentfirst}
+%\usepackage{units}
+\usepackage{pdflscape} % permite mudar a orientacao da pagina
+
+
+\renewcommand{\arraystretch}{1.6}
+
+% Indentação, consultar: http://en.wikibooks.org/wiki/LaTeX/Page_Layout
+\setlength{\voffset}{-5cm}
+\setlength{\hoffset}{-3cm}
+\setlength{\textwidth}{16cm}
+\setlength{\textheight}{30cm}
+\setlength{\parindent}{0.5cm}
+
+
+%arruma sqrt
+\usepackage{letltxmacro}
+\makeatletter
+\let\oldr@@t\r@@t
+\def\r@@t#1#2{%
+\setbox0=\hbox{$\oldr@@t#1{#2\,}$}\dimen0=\ht0
+\advance\dimen0-0.2\ht0
+\setbox2=\hbox{\vrule height\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
+\LetLtxMacro{\oldsqrt}{\sqrt}
+\renewcommand*{\sqrt}[2][\ ]{\oldsqrt[#1]{#2}}
+\makeatother
+%fim do arruma sqrt
+
+\begin{document}
+\title{Resumo Prob. 2}
+\author{Caio Volpato }
+\maketitle
+
+\begin{itemize}
+
+\item Probabilidade Condicional: $P(E|F)=\dfrac{P(E \cap F)}{P(F)}$
+
+\item Formula de Bayes: $E = (E \cap F) \cup (E \cap F^C) \Rightarrow P(E) = P(E|F)P(F) + P(E|F^C)(1-P(F))$
+
+Generalização: $P(F_j|E)=\dfrac{P(E|F_j)P(F_j)}{\sum_{i=1}^n P(E|F_i)P(F_i)}$
+
+\item Série de Taylor: $f(x) = \displaystyle\sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n$
+
+\item Série Geométrica (Geral): $\displaystyle\sum_{k=k_1}^{k_2}ar^k = a  \frac{r^{k_1}-r^{k_2}}{1-r} \quad k_1,k_2 \geq 0 , |r|< 1 $
+
+\item Teorema Binomial: $ (x+y)^n = \displaystyle\sum_{k=0}^{n} \binom{n}{k}x^{n-k}y^k$
+
+\item Esperança, Variância:(Discreto): $\mathbb{E}[X] := \displaystyle\sum_{x \in Dom} x \mathbb{P}(X=x)\quad \mbox{(Continuo):} \; \mathbb{E}[X]:= \displaystyle\int_{-\infty}^{\infty} xf(x) dx$\\
+
+$\mbox{Var}[X]:= \mathbb{E}[X^2] - \mathbb{E}^2[X] \; \mathbb{E}[aX+b] = a\mathbb{E}[X] + b \; \mbox{Var}[aX + bY] = a^2 \mbox{Var}[X]+b^2 \mbox{Var}[Y] + 2 a b \mbox{Cov}[X,Y]$
+
+\item Função Geratriz de Momento: $ M_X (t) := \mathbb{E}[e^{tx}]  \quad \mathbb{E}[x^n] = \displaystyle\lim_{t \to 0} M_X^{(n)}(t)$
+
+\item Função Característica: $ \varphi_X (t) := \mathbb{E}[e^{itx}] \quad i^k \mathbb{E}[X^k] = \displaystyle\lim_{t \to 0} \varphi_X^{(k)}(t)$
+
+\item Função Gamma:$ \; \Gamma(t) = \displaystyle\int_0^{\infty} x^{t-1}e^{-x} dx \quad \Gamma(n) = (n-1)! \quad \Gamma(t+1)=t \cdot \Gamma(t)$
+
+%\item Função Beta:
+
+\item Relações entre VA's:$X \sim N(\mu,\sigma^2) \Rightarrow \frac{X-\mu}{\sigma} \sim N(0,1) $
+
+$ X \sim N(\mu_x,\sigma_x^2),Y \sim N(\mu_y,\sigma_y^2) \Rightarrow X \pm Y \sim N(\mu_x \pm \mu_y, \sigma^2_x + \sigma^2_y)$
+
+$X_i \sim \exp( \lambda) \Rightarrow \sum_{i=1}^n X_i  \sim \mbox{Gamma} (n,\lambda)$
+
+$X_i \sim \mbox{Gamma}(\alpha_i,\beta) \Rightarrow \sum_{i=1}^k X_i \sim \mbox{Gamma} (\sum_{i=1}^k \alpha_i, \beta )$
+
+
+$ X_i \sim N(0,1) \Rightarrow  \sum_{j=1}^n X_j^2 \sim \chi^2_n \quad \mbox{Gamma}(\alpha=n/2, \lambda=1/2) \sim \chi^2_n$
+
+$Z \sim N(0,1), V \sim \chi^2_k \Rightarrow \frac{Z}{\sqrt{V/k}} \sim t_k $
+
+$ X_i \sim N(\mu,\sigma^2) \Rightarrow t=\frac{\overline{X}-\mu}{s/\sqrt{n}} \sim t_{n-1} \quad \mbox{Onde: } \overline{X}=\frac{1}{n} \sum_{i=1}^n X_i \quad s^2 = \frac{1}{n-1} \sum_{i=1}^n  (X_i -\overline{X})^2$
+
+$U \sim \chi^2_u , V \sim \chi^2_v \Rightarrow \frac{U/u}{V/v} \sim F(u,v) $
+
+$X,Y \sim N(0,1) \Rightarrow X/Y \sim \mbox{Cauchy}(0,1)$
+
+\item Desigualdades: Markov:$\; \forall a > 0 \quad P(|x| \geq a) \leq \frac{\mathbb{E}[X]}{a} \quad$ Chebyshev:$\; \forall a > 0 \quad P(|x - \mu| \geq a) \leq \frac{Var[X]}{a^2}$
+
+\item Tipos de convergência:$\begin{cases}
+\mbox{Probabilidade} & \displaystyle\lim_{n \to \infty} \mathbb{P}(|X-a| > \varepsilon ) = 0 \Leftrightarrow X \stackrel{\mbox{\small p }}{ \longrightarrow a} \\
+\mbox{Distribuição} & \displaystyle\lim_{n \to \infty} F_W (w) = F_Z (z) \Leftrightarrow W \stackrel{\mbox{ d }}{ \longrightarrow F} \mbox{~ou~} \displaystyle\lim_{n \to \infty} \varphi_w(t)=\varphi_z(t) \Leftrightarrow W \stackrel{\mbox{ d }}{ \longrightarrow F}\\
+\mbox{Quase Certamente} & \mathbb{P} \left( \displaystyle\lim_{n \to \infty} X_n = X\right) = 1 \Leftrightarrow X_n \stackrel{\mbox{ q.c }}{ \longrightarrow X}\\
+\end{cases}$
+
+\item Lei dos Grandes Números: $\begin{cases}
+\mbox{Fraca:} & \overline{X_n} \stackrel{\mbox{\small p }}{ \longrightarrow \mu} \\
+\mbox{Forte:} & \overline{X_n} \stackrel{\mbox{\small q.c }}{ \longrightarrow \mu}
+\end{cases}$
+
+\item Teorema do Limite Central:$X_1,\cdots,X_n \mbox{~iid tq.~} \mathbb{E}[X] = \mu,Var[X] = \sigma^2 \Rightarrow \frac{X_1+\cdots+X_n - n\mu}{\sigma\sqrt{n}} \rightarrow N(0,1)$
+
+\end{itemize}
+
+\newpage
+
+\begin{landscape} 
+\begin{table}[tph]
+\begin{centering}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline 
+Distribuição  & FDP  & Domínio  & $\mathbb{E}[x]$  & Var{[}x{]}  & $M_{X}(t)$  & $\varphi_{X}(t)$\tabularnewline
+\hline 
+\multicolumn{6}{|c}{\textbf{Discretas}} & \tabularnewline
+\hline 
+Bernoulli (p) & $\mathbb{P}(X=k)=p^{k}(1-p)^{1-k}$ & $x\in\{0,1\},p\in[0,1]$ & $p$ & $p(1-p)$ & $(1-p)+pe^{t}$ & $(1-p)+pe^{it}$\tabularnewline
+\hline 
+Binomial(n,p)  & $\mathbb{P}(X=k)=\binom{n}{k}p^{k}(1-p)^{n-k}$  & $k=0,1,\cdots,n$  & $np$  & $np(1-p)$  & $(p(e^{t}-1)+1)^{n}$  & $(p(e^{it}-1)+1)^{n}$ \tabularnewline
+\hline 
+Poisson($\lambda$)  & $\mathbb{P}(X=k)=\frac{e^{-\lambda}\lambda^{k}}{k!}$  & $\lambda>0,k=0,1,\cdots$  & $\lambda$  & $\lambda$  & $\exp(\lambda(e^{t}-1))$ & $\exp(\lambda(e^{it}-1))$\tabularnewline
+\hline 
+Geométrica(p)  & $\mathbb{P}(X=k)=(1-p)^{k}p$  & $k=0,1,\cdots$  & $\frac{1-p}{p}$  & $\frac{1-p}{p^{2}}$  & $\frac{p}{1-(1-p)e^{t}}$  & $\frac{p}{1-(1-p)e^{it}}$ \tabularnewline
+\hline 
+\multicolumn{6}{|c}{\textbf{Continuas}} & \tabularnewline
+\hline 
+Uniforme(a,b)  & $f(x)=\frac{1}{b-a}$  & $x\in[a,b]$  & $\frac{a+b}{2}$  & $\frac{(b-a)^{2}}{12}$  & $\frac{e^{bt}-e^{at}}{t(b-a)}$  & $\frac{e^{ibt}-e^{iat}}{it(b-a)}$ \tabularnewline
+\hline 
+Exponencial($\lambda$)  & $f(x)=\lambda e^{-\lambda x}$  & $\lambda>0,x>0$  & $\frac{1}{\lambda}$  & $\frac{1}{\lambda^{2}}$  & $\frac{\lambda}{\lambda-t}$  & $\frac{\lambda}{\lambda-it}$ \tabularnewline
+\hline 
+Normal$(\mu,\sigma^{2})$  & $f(x)=\frac{1}{\sqrt{2\pi\sigma^{2}}}\exp\left(-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^{2}\right)$  & $x\in\mathbb{R}$  & $\mu$  & $\sigma^{2}$  & $\exp\left(\mu t+\frac{\sigma^{2}t^{2}}{2}\right)$  & $\exp\left(\mu it-\frac{\sigma^{2}t^{2}}{2}\right)$\tabularnewline
+\hline 
+Gamma$(\alpha,\lambda)$  & $f(x)=\dfrac{\lambda e^{-\lambda x}(\lambda x)^{\alpha-1}}{\Gamma(\alpha)}$  & $\alpha,\lambda>0,x\geq0$  & $\dfrac{\alpha}{\lambda}$  & $\dfrac{\alpha}{\lambda^{2}}$  & $\left(\dfrac{\lambda-t}{\lambda}\right)^{-\alpha}$  & $\left(\dfrac{\lambda-it}{\lambda}\right)^{-\alpha}$\tabularnewline
+\hline 
+t de Student ($t_{v}$)  & $\frac{\Gamma(\frac{v+1}{2})}{\sqrt{v\pi}\Gamma(\frac{v}{2})}(1+\frac{x^{2}}{v})^{-\frac{v+1}{2}}$ & $x\in\mathbb{R},v>0$  &  &  & - & \tabularnewline
+\hline 
+F($u,v$)  &  &  &  &  & -  & \tabularnewline
+\hline 
+Cauchy($\alpha,\beta$)  & $f(x)=\dfrac{1}{\pi\beta\left[1+\left[\frac{x-\alpha}{\beta}\right]^{2}\right]}$  & $\beta>0\; x,\alpha\in\mathbb{R}$  & -  & -  & -  & \tabularnewline
+\hline 
+Qui Quadrado ($\chi_{v}^{2}$)  & $f(x)=\dfrac{1}{2^{v/2}\;\Gamma(v/2)}x^{(v/2)-1}\exp\left(-\dfrac{x}{2}\right)$  & $x>0,v>0$  & $v$  & $2v$  & $(1-2t)^{-v/2}$  & $(1-2it)^{-v/2}$\tabularnewline
+\hline 
+Beta($\alpha,\beta$)  & $f(x)=\dfrac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha-1}(1-x)^{\beta-1}$  & $x\in(0,1)$  & $\dfrac{\alpha}{\alpha+\beta}$  &  &  & \tabularnewline
+\hline 
+\end{tabular}
+\par\end{centering}
+
+\protect\caption{Resumo de Distribuições}
+\end{table}
+
+
+\end{landscape}
+\end{document}
