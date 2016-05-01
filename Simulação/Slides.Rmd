@@ -1,0 +1,216 @@
+---
+title: "Simulações"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale(locale='UTF-8')
+```
+
+## Por que usar simulação?
+
+Suponha que temos uma amostra aleatória $X_1,X_2,\dots,X_n$ de uma distribuição $X \sim Bin(1,p)$. 
+
+Sabemos que um I.C. com coeficiente de confiança $\gamma$ para $p$ é encontrado usando a aproximação da Binomial pela Normal, e a expressão para o intervalo é 
+
+$$(\bar{X} - z_{(1-\alpha /2)}\sqrt{\frac{\bar{X}(1-\bar{X})}{n}} ; \bar{X} + z_{(1-\alpha /2)}\sqrt{\frac{\bar{X}(1-\bar{X})}{n}})$$ 
+
+onde $\alpha = 1-\gamma$
+
+Mas como podemos ver que esse intervalo de fato vai conter a verdadeira proporção $p$, em média, $100\gamma \%$ das vezes? Usando simulação!
+
+## Intervalo de Confiança para proporção
+
+Por exemplo, suponha que temos uma amostra de $n=30$ e $p=0.5$. (Perceba que é uma simulação, já que na "vida real" não saberíamos o verdadeiro valor de $p$.)
+
+Podemos usar o software R para gerar uma amostra com essas características, e fazer um I.C. para $p$ usando essa amostra. 
+
+## Intervalo de Confiança para proporção
+
+O código abaixo gera essa população e calcula um I.C. com $\gamma = 0.95$
+
+```{r um_ic, echo = TRUE}
+n=30
+p=0.5
+gamma = 0.95
+alpha = 1-gamma
+za = qnorm(1-alpha/2)  ##P(Z <= 1-alpha/2). 1.96 para alpha = 0.05.
+x = rbinom(n,1,p)     ##Gera n Binomiais com parâmetros (1,p)
+IC = mean(x) + c(-1,1)*za*sqrt(mean(x)*(1-mean(x)))/sqrt(n)
+names(IC) = c("Limite Inferior","Limite Superior")
+IC
+```
+
+## Intervalo de Confiança para proporção
+
+Mas pode acontecer que esse intervalo não contenha a verdadeira proporção! 
+
+O que podemos fazer então é repetir a construção desse intervalo para várias amostras diferentes e ver em quantas das repetições o intervalo encontrado realmente contenha $p$. 
+
+E, fazendo isso, temos uma estimativa para a real cobertura do intervalo, que seria $$\frac{\textrm{# Intervalos que contém p}}{\textrm{# Total de intervalos}}$$
+
+## Intervalo de Confiança para proporção
+
+Calculando IC's para diferentes amostras:
+
+```{r vario_ic, echo=TRUE}
+m=1000  #Número de repetições/IC's gerados
+IC = matrix(0,m,2) #Cada linha é um IC, cada coluna um limite
+colnames(IC) = c("lower","upper")
+for(i in 1:m){  #Gerando os ICs
+  x = rbinom(n,1,p)
+  IC[i,] = mean(x)+c(-1,1)*za*sqrt(mean(x)*(1-mean(x)))/sqrt(n)
+}
+y = sum(as.numeric((IC[,1]<p & p<IC[,2])))
+names(y) = "Quantidade de Intervalos que contém p"
+gamma = y/m
+names(gamma) = "Estimativa para a cobertura do intervalo"
+```
+
+## Intervalo de Confiança para proporção
+
+O código acima gerou `r m` intervalos de confiança com $\gamma = 0.95$. 
+
+A variável `y` conta quantos dos intervalos gerados contém $p$, que nesse caso é `r p`. Temos então:
+
+```{r echo=TRUE}
+y
+```
+
+## Intervalo de Confiança para proporção
+
+E a variável `gamma` é uma estimativa para a cobertura do intervalo 
+
+$$(\bar{X} - z_{(1-\alpha /2)}\sqrt{\frac{\bar{X}(1-\bar{X})}{n}} ; \bar{X} + z_{(1-\alpha /2)}\sqrt{\frac{\bar{X}(1-\bar{X})}{n}}).$$ 
+
+Note que o esperado é que esse intervalo cubra a verdadeira proporção $95 \%$ das vezes. E, nesse caso, temos:
+
+```{r}
+gamma
+```
+
+## Largura mínima I.C. para variância
+
+Considere $X_1,X_2, \dots, X_n$ uma a.a. de uma distribuição $X \sim N(\mu,\sigma^2)$. Sabemos que 
+
+$$Q = \frac{(n-1)S^2}{\sigma ^2} \sim \chi_{(n-1)}^2$$
+
+E que um I.C. $100\gamma \%$ para variância é:
+
+$$(\frac{(n-1)S^2}{q_2} , \frac{(n-1)S^2}{q_1})$$
+
+onde $q_1$ e $q_2$ são tais que 
+
+$$\int_{q_1}^{q_2} f_Q(x) dx = \gamma$$
+
+## Largura mínima I.C. para variância
+
+Vamos encontrar a largura mínima para quando $\gamma =0.95$ e $n=51$.
+
+Note que de $\int_{q_1}^{q_2} f_Q(x) dx = 0.95$, precisamos que 
+
+$$P(Q<q_1)+P(Q>q_2) = 0.05$$
+
+Seja $P(Q<q_1) = \alpha$ e $P(Q>q_2) = \beta$. Então, temos a relação $\beta = 0.05-\alpha$. Por exemplo, se $\alpha = 0.02$, então $\beta = 0.03$. 
+
+O código abaixo começa considerando diferentes valores para $\alpha$ e encontra $q_1$ e $q_2$ para cada um desses valores. 
+
+## Largura mínima I.C. para variância
+
+```{r echo=TRUE, cache=TRUE}
+alpha = seq(from = 0.001, to = 0.05, by = 0.00001)
+beta = 0.05-alpha
+n=51
+
+q_1 = qchisq(alpha,n-1)
+q_2 = qchisq(1-beta,n-1)
+
+quantis = data.frame(q_1,q_2)
+colnames(quantis) = c("q_1","q_2")
+head(quantis)
+```
+
+## Largura mínima I.C. para variância
+
+Note que se definirmos `ProbIC` como a integral que discutimos acima, para cada um desses $q_1$ e $q_2$, o resultado seria sempre $0.95$. 
+
+```{r echo=TRUE, cache=TRUE}
+ProbIC = pchisq(q_2,n-1)-pchisq(q_1,n-1)
+y=mean(ProbIC<0.95+0.001 & ProbIC>0.95-0.001)
+y  ##Se y=1, então todos elementos de ProbIC são 0.95
+```
+
+Note que como $y=1$, todos elementos do vetor `ProbIC` são 0.95 (Consideramos um erro de 0.001, para aproximações.) 
+
+## Largura mínima I.C. para variância
+
+Vamos agora, dada uma amostra da normal, encontrar a largura de I.C. para cada valores de $\alpha$. 
+
+A largura do I.C. é dada por 
+
+$$(n-1)S^2\left(\frac{1}{q_2}-\frac{1}{q_1}\right)$$
+
+E portanto a menor largura acontecerá quando $\left(\frac{1}{q_2}-\frac{1}{q_1}\right)$ for mínimo, independente do valor de $S^2$. 
+
+Como exemplo, vamos considerar que a amostra veio de uma distribuição $X \sim N(0,20)$, mas qualquer normal levaria ao mesmos valores para $q_1$ e $q_2$. (Lembre-se, n=51).
+
+## Largura mínima I.C. para variância
+
+```{r echo = TRUE}
+x = rnorm(n,0,50)
+S2 = var(x)
+largura = (n-1)*S2*(1/q_1-1/q_2)
+```
+
+Agora, temos um vetor com a largura do I.C. para cada valores de $q_1$ e $q_2$.
+
+O gráfico a seguir considera a largura em função de $q_1$
+
+## Largura mínima I.C. para variância 
+
+```{r echo=FALSE}
+plot(q_1,largura)
+```
+
+## Largura mínima I.C. para variância
+
+Note pelo gráfico que a largura do I.C. tem um ponto mínimo. Podemos encontrar esse ponto fazendo:
+
+```{r}
+idx = which.min(largura)
+largura[idx]
+```
+
+E os valores de $q_1$ e $q_2$ que levam a essa largura mínima são 
+
+```{r}
+qs = c(q_1[idx],q_2[idx])
+names(qs) = c("q_1","q_2")
+qs
+```
+
+## Largura mínima I.C. para variância
+
+Na página $383$ do livro "Introduction to The Theory of Statistics - Mood, Alexander McFarlane", foi derivada uma relação para que a largura do intervalo para variância seja mínima. Essa relação é:
+
+$$\begin{array}
+qq_1^2f_Q(q_1) = q_2^2f_Q(q_2) \\ \int_{q_1}^{q_2}f_Q(x) dx = \gamma
+\end{array}$$
+
+## Largura mínima I.C. para variância
+
+E, no nosso exemplo, temos 
+
+```{r}
+v1 = qs[1]*qs[1]*dchisq(qs[1],n-1)
+v2 = qs[2]*qs[2]*dchisq(qs[2],n-1)
+v = round(v1/v2,3)
+names(v)=NULL
+v
+```
+
+Ou seja, nosso resultado condiz com a relação citada.
+
+## Comentários
+
+Se quiser calcular os resultados aqui apresentados para outros tamanhos amostrais ou outros coeficientes de confiança, basta usar o mesmo código, mudando os valores de $n$ e $gamma$. 
