@@ -1,0 +1,63 @@
+\documentclass[12pt,a4paper]{article}
+\title{Lista 5 - Teste de Hipóteses}
+
+\date{}
+\usepackage{amsmath}
+\usepackage{bbm}
+\usepackage{dsfont}
+\usepackage{enumitem}
+\usepackage[utf8]{inputenc}
+
+\begin{document}
+\maketitle
+
+\begin{enumerate}[label=\textbf{\arabic*)}]
+
+\item Para os dois testes triviais abaixo, diga qual é o tamanho do teste, o poder e o que isso diz sobre a probabilidade dos erros do Tipo I e Tipo II.
+
+	\begin{itemize}
+		\item[(a)] Sempre rejeita $H_0$, independente dos dados obtidos.
+		\item[(b)] Sempre aceita $H_0$, independente dos dados obtidos.
+	\end{itemize}
+
+\item Para uma amostra aleatória $X_1,X_2,\dots,X_n$ de uma distribuição $Bernoulli(p)$, suponha que queremos testar
+
+$$H_0: p=0.49 \, \, \, \, vs \, \, \, \, H_1: p=0.51$$
+
+Considere que rejeita-se $H_0$ se $\sum_{i=1}^n X_i > c$. Use o TCL para encontrar $c$ e $n$ tais que a probabilidade dos dois erros sejam $0.01$.
+
+\item Seja $X_1,X_2,\dots,X_n$ uma amostra aleatória de $U(\theta, \theta +1)$. Para testar 
+
+$$H_0: \theta = 0 \, \, \, \, vs \, \, \, \, H_1: \theta > 0$$
+
+use o teste 
+
+$$Rejeita \, \, H_0 \, \,  se \, \,  X_{(n)} > 1 \, \, ou \, \, X_{(1)} \geq k.$$
+
+Encontre k para que o teste tenha tamanho $\alpha$.
+
+\item Seja $X_1,X_2,\dots,X_n$ i.i.d $N(\mu,\sigma^2)$, $\mu_0$ um valor específico de $\mu$ e $\sigma^2$ desconhecido. Para testar
+
+$$H_0: \mu = \mu_0 \, \, \, \, vs \, \, \, \, H_1: \mu \neq \mu_0$$
+
+mostre que o teste que rejeita $H_0$ se $|\bar{X}-\mu_0| > t_{n-1,\alpha/2}\frac{S}{\sqrt{n}}$ tem tamanho $\alpha$. 
+
+\item Para o teste acima, qual a relação entre a região de rejeição sugerida e um intervalo de confiança com $\gamma = 0.95$ para $\mu$?
+
+\item Considere a seguinte distribuição: $$f(x;\theta) = \theta x^{\theta-1}I_{(0,1)}(x).$$ E que queremos testar $$H_0: \theta \leq 1\, \, \, \, vs \, \, \, \, H_1: \theta > 1$$
+
+Para uma amostra de tamanho 1, calcule tamanho do teste e o poder quando rejeitamos $H_0$ se $X > 1/2$.
+
+\item Um fabricante de artigos esportivos alega que a variância na resistência de uma certa linha de pesca é de $15.9$. Uma a.a. de $15$ carretéis de linha de pesca tem uma variância de $21.8$. Sendo $\alpha = 0.05$, há evidências suficientes para rejeitar a alegação do fabricante? Suponha que a população seja normalmente distribuída.
+
+\item Um fabricante garante que $ 90\% $ das peças que fornece à linha de produção de uma determinada fábrica estão de acordo com as especificações exigidas. A análise de uma amostra de $ 200 $ peças revelou $ 25 $ defeituosas. A um nível de $ 5\% $, podemos dizer que é verdadeira a afirmação do fabricante?
+
+\item Seja $ X_1,\ldots,X_n $ uma amostra aleatória independente e igualmente distribuída da população com distribuição normal $ N(\theta,1) $. Considere as hipóteses $\theta = \theta_0$ $ versus \theta\neq\theta_0 $. Encontre a região crítica gerada pelo teste da razão de verossímilhanças.
+
+\item Um supervisor da qualidade quer testar, com base numa amostra aleatória de tamanho $ n = 35 $ e para um nível de significância $ \alpha = 0,05 $, se a profundidade média de um furo numa determinada peça é $ 72,4 $mm. O que podemos dizer se ele obteve $ \bar{x} = 73,2 $mm e se sabe, de informações anteriores, que $ \sigma = 2,1 $mm?
+
+\item 
+
+\end{enumerate}
+
+\end{document}

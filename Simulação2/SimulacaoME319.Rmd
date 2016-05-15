@@ -1,0 +1,346 @@
+---
+title: "Simulações"
+runtime: shiny
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+Sys.setlocale(locale='UTF-8')
+```
+
+## Por que usar simulação?
+
+Suponha que temos uma amostra aleatória $X_1,X_2,\dots,X_n$ de uma distribuição $X \sim Bin(1,p)$. 
+
+Sabemos que um I.C. com coeficiente de confiança $\gamma$ para $p$ é encontrado usando a aproximação da Binomial pela Normal, e a expressão para o intervalo é 
+
+$$(\bar{X} - z_{(1-\alpha /2)}\sqrt{\frac{\bar{X}(1-\bar{X})}{n}} ; \bar{X} + z_{(1-\alpha /2)}\sqrt{\frac{\bar{X}(1-\bar{X})}{n}})$$ 
+
+onde $\alpha = 1-\gamma$
+
+Mas como podemos ver que esse intervalo de fato vai conter a verdadeira proporção $p$, em média, $100\gamma \%$ das vezes? Usando simulação!
+
+## Intervalo de Confiança para proporção
+
+Por exemplo, podemos construir um código para gerar uma amostra de uma população de tamanho $n$ de uma população $X \sim Bin(1,p)$, escolhendo $n$ e $p$ de nossa preferência. O fato de ser uma simulação, provém do fato que na "vida real" não saberíamos o valor de p.
+
+Podemos usar o software R para gerar uma amostra com essas características, e fazer um I.C. para $p$ usando essa amostra.
+
+## Intervalo de Confiança para proporção
+
+
+```{r echo=FALSE}
+inputPanel(
+  selectInput("gamma",label = "Escolha gamma:",choices = c(0.90,0.95,0.99), selected = 0.95)
+)
+
+```
+
+A função abaixo gera essa população e calcula um I.C. com 
+
+```{r echo=FALSE}
+f <- function(g){ 
+  gam = g
+  names(gam)="Gamma"
+  return(gam)
+} 
+renderPrint(
+  print(f(input$gamma))
+)
+```
+
+
+
+```{r um_ic, echo = TRUE}
+IC_1 <- function(n,p,gamma){
+  alpha = 1-gamma
+  za = qnorm(1-alpha/2)  ##P(Z <= 1-alpha/2). 1.96 para alpha = 0.05.
+  x = rbinom(n,1,p)     ##Gera n Binomiais com parâmetros (1,p)
+  IC = mean(x) + c(-1,1)*za*sqrt(mean(x)*(1-mean(x)))/sqrt(n)
+  names(IC) = c("Limite Inferior","Limite Superior")
+  return(IC)
+}
+```
+
+## Intervalo de Confiança para proporção
+
+Mas pode acontecer que esse intervalo não contenha a verdadeira proporção! 
+
+O que podemos fazer então é repetir a construção desse intervalo para várias amostras diferentes, ver em quantas das repetições o intervalo encontrado realmente contenha $p$ e calcular uma estimativa da real cobertura do intervalo, dada por:
+
+$$\frac{\textrm{# Intervalos que contém p}}{\textrm{# Total de intervalos}}$$
+
+## Intervalo de Confiança para proporção
+
+Função que calcula IC's para diferentes amostras:
+
+```{r vario_ic, echo=TRUE}
+IC_2 <- function(n,p,m,gamma){
+  alpha = 1-gamma
+  za = qnorm(1-alpha/2)  ##P(Z <= 1-alpha/2). 1.96 para alpha = 0.05.
+  IC = matrix(0,m,2) #Cada linha é um IC, cada coluna um limite
+  colnames(IC) = c("lower","upper")
+  for(i in 1:m){  #Gerando os ICs
+    x = rbinom(n,1,p)
+    IC[i,] = mean(x)+c(-1,1)*za*sqrt(mean(x)*(1-mean(x)))/sqrt(n)
+  }
+  y = sum(as.numeric((IC[,1]<p & p<IC[,2])))
+  est = y/m
+  names(est) = "Estimativa para a cobertura do intervalo"
+  return(est)
+}
+```
+
+## Intervalo de Confiança para proporção
+
+Escolha os parâmetros:
+
+```{r echo=FALSE}
+inputPanel(
+  textInput(inputId = "n",label = "Tamanho amostral", value=51)
+)
+
+inputPanel(
+  selectInput(inputId = "p",label = "Proporção populacional",choices = seq(from =0.1,to=0.9,by=0.1),selected = 0.5)
+)
+
+inputPanel(
+  textInput(inputId = "m",label = "Número repetições", value=1000)
+)
+```
+
+Para esse número de repetições, temos que a estimativa é:
+
+```{r echo=FALSE}
+renderPrint(
+  print(IC_2(as.integer(input$n),as.numeric(input$p),as.integer(input$m),as.numeric(input$gamma)))
+)
+```
+
+## Intervalo de Confiança para proporção
+
+Note que se fossemos calcular apenas um I.C., poderíamos ter ou não um intervalo que contém $p$.
+
+Mude o tamanho amostral para mudar o intervalo, e veja se ele contém ou não o $p$ escolhido anteriormente. 
+
+```{r echo=FALSE}
+inputPanel(
+  textInput(inputId = "n1",label = "Tamanho amostral", value = 51)
+)
+
+renderPrint(
+  print(IC_1(as.integer(input$n1),as.numeric(input$p),as.numeric(input$gamma)))
+)
+```
+
+## Largura mínima I.C. para variância
+
+Considere $X_1,X_2, \dots, X_n$ uma a.a. de uma distribuição $X \sim N(\mu,\sigma^2)$. Sabemos que 
+
+$$Q = \frac{(n-1)S^2}{\sigma ^2} \sim \chi_{(n-1)}^2$$
+
+E que um I.C. $100\gamma \%$ para variância é:
+
+$$(\frac{(n-1)S^2}{q_2} , \frac{(n-1)S^2}{q_1})$$
+
+onde $q_1$ e $q_2$ são tais que 
+
+$$\int_{q_1}^{q_2} f_Q(x) dx = \gamma$$
+
+## Largura mínima I.C. para variância
+
+Vamos encontrar a largura mínima para quando $\gamma =0.95$ e $n=51$.
+
+Note que de $\int_{q_1}^{q_2} f_Q(x) dx = 0.95$, precisamos que 
+
+$$P(Q<q_1)+P(Q>q_2) = 1-\gamma$$
+
+Seja $P(Q<q_1) = \alpha$ e $P(Q>q_2) = \beta$. Então, temos a relação $\beta = (1-\gamma)-\alpha$. Por exemplo, se $\gamma =0.95$ e $\alpha = 0.02$, então $\beta = 0.03$. 
+
+Vamos agora criar uma função que dado um $\gamma$ e $n$ escolhidos, calcula diferentes valores possíveis para $\alpha$ e $\beta$ e encontra os quantis da qui-quadrado para cada um desses valores.
+
+## Largura mínima I.C. para variância
+
+```{r echo=FALSE}
+inputPanel(
+  selectInput("gamma1",label = "Escolha gamma:",choices = c(0.90,0.95,0.99), selected = 0.95)
+)
+
+inputPanel(
+  textInput("n1", label = "Escolha tamanho amostral", value = 51)
+)
+```
+
+```{r, echo = TRUE}
+quantis <- function(n,gamma){
+  alpha = seq(from = 0.001, to = 1-gamma, by = 0.00001)
+  beta = (1-gamma)-alpha
+
+  q_1 = qchisq(alpha,n-1)
+  q_2 = qchisq(1-beta,n-1)
+
+  qua = data.frame(q_1,q_2)
+  colnames(qua) = c("q_1","q_2")
+  return(qua)
+}
+```
+
+## Largura mínima I.C. para variância
+
+Note que se definirmos `ProbIC` como a integral que discutimos acima, para cada um desses $q_1$ e $q_2$, o resultado seria sempre $\gamma$. 
+
+```{r echo=TRUE}
+ProbIC <- function(n,gamma){
+  prob_IC = pchisq(quantis(n,gamma)[,2],n-1)-pchisq(quantis(n,gamma)[,1],n-1)
+  y=mean(prob_IC<gamma+0.001 & prob_IC>gamma-0.001)
+  return(y)  ##Se y=1, então todos elementos de ProbIC são 0.95
+}
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(ProbIC(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+## Largura mínima I.C. para variância
+
+Note que como $y=1$, todos elementos do vetor `ProbIC` são $\gamma$ (Consideramos um erro de 0.001, para aproximações.) 
+
+Vamos agora, dada uma amostra da normal, encontrar a largura de I.C. para cada valores um dos de $\alpha$. 
+
+A largura do I.C. é dada por 
+
+$$(n-1)S^2\left(\frac{1}{q_2}-\frac{1}{q_1}\right)$$
+
+E portanto a menor largura acontecerá quando $\left(\frac{1}{q_2}-\frac{1}{q_1}\right)$ for mínimo, independente do valor de $S^2$. 
+
+## Largura mínima I.C. para variância
+
+Como exemplo, vamos considerar que a amostra veio de uma distribuição $X \sim N(0,20)$, mas qualquer normal levaria ao mesmos valores para $q_1$ e $q_2$.
+
+```{r echo = TRUE}
+largura<-function(n,gamma){
+  x = rnorm(n,0,50)
+  S2 = var(x)
+  largura = (n-1)*S2*(1/quantis(n,gamma)[,1]-1/quantis(n,gamma)[,2])
+}
+```
+
+Agora, temos um vetor com a largura do I.C. para cada valores de $q_1$ e $q_2$.
+
+O gráfico a seguir considera a largura em função de $q_1$
+
+## Largura mínima I.C. para variância 
+
+```{r echo=FALSE}
+myplot <- function(n,gamma){
+  data = data.frame(quantis(n,gamma)[,1],largura(n,gamma))
+  p1 = plot(data,xlab="q1",ylab="largura")
+  return(p1)
+}
+
+renderPlot(
+  myplot(as.integer(input$n1),as.numeric(input$gamma1))
+)
+```
+
+## Largura mínima I.C. para variância
+
+Note pelo gráfico que a largura do I.C. tem um ponto mínimo. Podemos encontrar esse ponto fazendo:
+
+```{r echo=TRUE}
+larg_min <- function(n,gamma){
+  idx = which.min(largura(n,gamma))
+  return(largura(n,gamma)[idx])
+}
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(larg_min(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+## Largura mínima I.C. para variância
+
+E os valores de $q_1$ e $q_2$ que levam a essa largura mínima são 
+
+```{r}
+quantis_min <- function(n,gamma){
+  idx = which.min(largura(n,gamma))
+  qs = c(quantis(n,gamma)[idx,1],quantis(n,gamma)[idx,2])
+  names(qs) = c("q1","q2")
+  return(qs)
+} 
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(quantis_min(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+## Largura mínima I.C. para variância
+
+Na página $383$ do livro "Introduction to The Theory of Statistics - Mood, Alexander McFarlane", foi derivada uma relação para que a largura do intervalo para variância seja mínima. Essa relação é:
+
+$$\begin{array}
+qq_1^2f_Q(q_1) = q_2^2f_Q(q_2) \\ \int_{q_1}^{q_2}f_Q(x) dx = \gamma
+\end{array}$$
+
+## Largura mínima I.C. para variância
+
+E, no nosso exemplo, temos 
+
+```{r}
+testemin <- function(n,gamma){
+  idx = which.min(largura(n,gamma))
+  qs = c(quantis(n,gamma)[idx,1],quantis(n,gamma)[idx,2])
+  names(qs) = c("q1","q2")
+  v1 = qs[1]*qs[1]*dchisq(qs[1],n-1)
+  v2 = qs[2]*qs[2]*dchisq(qs[2],n-1)
+  v=round(v1/v2,3)
+  names(v) = NULL
+  return(v)
+} 
+
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(testemin(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+Ou seja, nosso resultado condiz com a relação citada.
+
+## Largura mínima I.C. para variância
+
+E, por fim, podemos criar um função que calcula $P(Q<q1)$ e $P(Q>q2)$
+
+```{r}
+proba <- function(n,gamma){
+  idx = which.min(largura(n,gamma))
+  qs = c(quantis(n,gamma)[idx,1],quantis(n,gamma)[idx,2])
+  probs = c(pchisq(qs[1],n-1),1-pchisq(qs[2],n-1))
+  names(probs) = c("P(Q<q1)","P(Q>q2)")
+  return(probs)
+}
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(proba(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+## Largura mínima vs Clássico
+
+```{r}
+quantil_clas <- function(n,gamma){
+  y=quantis(n,gamma)
+  
+}
+```
+
