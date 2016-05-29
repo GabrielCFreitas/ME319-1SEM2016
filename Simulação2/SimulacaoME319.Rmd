@@ -149,9 +149,9 @@ $$\int_{q_1}^{q_2} f_Q(x) dx = \gamma$$
 
 ## Largura mínima I.C. para variância
 
-Vamos encontrar a largura mínima para quando $\gamma =0.95$ e $n=51$.
+Vamos encontrar a largura mínima para $\gamma$ e $n$ escolhidos.
 
-Note que de $\int_{q_1}^{q_2} f_Q(x) dx = 0.95$, precisamos que 
+Note que de $\int_{q_1}^{q_2} f_Q(x) dx = \gamma$, precisamos que 
 
 $$P(Q<q_1)+P(Q>q_2) = 1-\gamma$$
 
@@ -221,7 +221,7 @@ Como exemplo, vamos considerar que a amostra veio de uma distribuição $X \sim 
 
 ```{r echo = TRUE}
 largura<-function(n,gamma){
-  x = rnorm(n,0,50)
+  x = rnorm(n,0,10)
   S2 = var(x)
   largura = (n-1)*S2*(1/quantis(n,gamma)[,1]-1/quantis(n,gamma)[,2])
 }

@@ -1,0 +1,368 @@
+---
+title: "Simulações ME319"
+runtime: shiny
+output: html_document
+---
+
+# Largura mínima IC para variância
+
+Considere $X_1,X_2, \dots, X_n$ uma a.a. de uma distribuição $X \sim N(\mu,\sigma^2)$. Sabemos que 
+
+$$Q = \frac{(n-1)S^2}{\sigma ^2} \sim \chi_{(n-1)}^2$$
+
+E que um I.C. $100\gamma \%$ para variância é:
+
+$$\left(\frac{(n-1)S^2}{q_2} , \frac{(n-1)S^2}{q_1}\right)$$
+
+onde $q_1$ e $q_2$ são tais que 
+
+$$\int_{q_1}^{q_2} f_Q(x) dx = \gamma$$
+
+Vamos encontrar a largura mínima para $\gamma$ e $n$ escolhidos.
+
+Note que de $\int_{q_1}^{q_2} f_Q(x) dx = \gamma$, precisamos que 
+
+$$P(Q<q_1)+P(Q>q_2) = 1-\gamma$$
+
+Seja $P(Q<q_1) = \alpha$ e $P(Q>q_2) = \beta$. Então, temos a relação $\beta = (1-\gamma)-\alpha$. Por exemplo, se $\gamma =0.95$ e $\alpha = 0.02$, então $\beta = 0.03$. 
+
+A função abaixo calcula, dados $\gamma$ e $n$ escolhidos, diferentes valores possíveis para $\alpha$ e $\beta$ e encontra os quantis da qui-quadrado para cada um desses valores.
+
+```{r quantis, echo = TRUE}
+quantis <- function(n,gamma){
+  alpha = seq(from = 0.001, to = 1-gamma, by = 0.00001)
+  beta = (1-gamma)-alpha
+
+  q_1 = qchisq(alpha,n-1)
+  q_2 = qchisq(1-beta,n-1)
+
+  qua = data.frame(q_1,q_2)
+  colnames(qua) = c("q_1","q_2")
+  return(qua)
+}
+```
+
+Vamos agora, dada uma amostra da normal, encontrar a largura de I.C. para cada valores um dos de $\alpha$. 
+
+A largura do I.C. é dada por 
+
+$$(n-1)S^2\left(\frac{1}{q_1}-\frac{1}{q_2}\right)$$
+
+E portanto a menor largura acontecerá quando $\left(\frac{1}{q_1}-\frac{1}{q_2}\right)$ for mínimo, independente do valor de $S^2$. 
+
+Como exemplo, considere que a amostra veio de uma distribuição $X \sim N(0,20)$, mas qualquer normal levaria ao mesmos valores para $q_1$ e $q_2$.
+
+Primeiro, escolha os valores de $\gamma$ e $n$:
+
+```{r gamma&n, echo=FALSE}
+inputPanel(
+  selectInput("gamma1",label = "Escolha gamma:",choices = c(0.90,0.95,0.99), selected = 0.95)
+)
+
+inputPanel(
+  textInput("n1", label = "Escolha tamanho amostral", value = 51)
+)
+```
+
+A função a seguir gera uma amostra da distribuição e calcula a largura do I.C. para os valores diferentes de $q_1$ e $q_2$, retornando um vetor onde cada entrada é uma dessas larguras
+
+
+```{r larguras, echo = TRUE}
+largura<-function(n,gamma){
+  x = rnorm(n,0,10)
+  S2 = var(x)
+  largura = (n-1)*S2*(1/quantis(n,gamma)[,1]-1/quantis(n,gamma)[,2])
+}
+```
+
+Ao plotar a largura do I.C. em função de $q_1$, notamos que existe um ponto mínimo.
+
+```{r echo=FALSE}
+myplot <- function(n,gamma){
+  data = data.frame(quantis(n,gamma)[,1],largura(n,gamma))
+  p1 = plot(data,xlab="q1",ylab="largura")
+  return(p1)
+}
+
+renderPlot(
+  myplot(as.integer(input$n1),as.numeric(input$gamma1))
+)
+```
+
+Os quantis que levam a esse mínimo são:
+
+```{r}
+quantis_min <- function(n,gamma){
+  idx = which.min(largura(n,gamma))
+  qs = c(quantis(n,gamma)[idx,1],quantis(n,gamma)[idx,2])
+  names(qs) = c("q1","q2")
+  return(qs)
+} 
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(quantis_min(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+Se fizermos o I.C. usual, usando $P(Q<q_1) =P(Q>q_2)=\frac{1-\gamma}{2}$, teríamos os seguintes quantis:
+
+```{r}
+quantis_usuais <- function(n,gamma){
+  alpha = (1-gamma)/2
+  q_1 = qchisq(alpha,n-1)
+  q_2 = qchisq(1-alpha,n-1)
+  
+  qs = c(q_1,q_2)
+  names(qs)=c("q1","q2")
+  
+  return(qs)
+}
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(quantis_usuais(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+Ou seja, se tivessemos por exemplo $S^2 = 100$, teríamos como largura mínima:
+
+```{r}
+quantis_min_dif <- function(n,gamma){
+  idx = which.min(largura(n,gamma))
+  qs = 1/quantis(n,gamma)[idx,1]-1/quantis(n,gamma)[idx,2]
+  return((n-1)*100*qs)
+} 
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(quantis_min_dif(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+E como largura do I.C. usual:
+
+```{r}
+quantis_usuais_dif <- function(n,gamma){
+  alpha = (1-gamma)/2
+  q_1 = qchisq(alpha,n-1)
+  q_2 = qchisq(1-alpha,n-1)
+  
+  qs = 1/q_1-1/q_2
+  
+  return((n-1)*100*qs)
+}
+```
+
+```{r echo=FALSE}
+renderPrint(
+  print(quantis_usuais_dif(as.integer(input$n1),as.numeric(input$gamma1)))
+)
+```
+
+
+Ou seja, a diferença entre as larguras não é tão grande, indicando que não é um problema usar o I.C. usual ao invés de procurar o que tem menor largura.
+
+
+# Largura do I.C. para média
+
+Quando temos $X_1,X_2,\dots,x_n$ uma amostra aleatória com $X \sim N(\mu,\sigma^2)$, temos dois intervalos de confiança diferente para $\mu$, quando $\sigma^2$ é conhecido e quando não é. 
+
+Para $\sigma^2$ conhecido, temos o seguinte intervalo de confiança $100 \gamma \%$ para $\mu$:
+
+$$\left(\bar{X} - z_{\alpha/2}*\frac{\sigma}{sqrt{n}} ; \bar{X} + z_{\alpha/2}*\frac{\sigma}{sqrt{n}}\right)$$
+
+onde $z_{\alpha/2}$ é o quantil $\alpha/2$ da normal padrão ($\alpha = 1+\gamma$)
+
+Já para $\sigma^2$ desconhecido, o intervalo muda um pouco:
+
+$$\left(\bar{X} - t_{\alpha/2,n-1}\frac{S}{sqrt{n}} ; \bar{X} + t_{\alpha/2,n-1}*\frac{S}{sqrt{n}}\right)$$
+
+onde $t_{\alpha/2,n-1}$ é o quantil $\alpha/2$ da distribuição $t$ com $n-1$ graus de liberdade ($\alpha = 1+\gamma$)
+
+Ambos os intervalos tem o mesmo coeficiente de confiança, mas será que as larguras diferem muito? A função abaixo constrói uma amostra de tamanho escolhido e calcula a largura de cada um dos I.C.'s. 
+
+```{r largura}
+larg <- function(n, gamma, mu, sigma){
+  x = rnorm(n,mu,sigma)
+  S = sd(x)
+  larg1 = 2*qnorm((1+gamma)/2)*sigma/sqrt(n)
+  larg2 = 2*qt((1+gamma)/2,n-1)*S/sqrt(n)
+  
+  largs = c(larg1,larg2)
+  names(largs) = c("Conhecido", "Desconhecido")
+  
+  return(largs)
+}
+```
+
+Como exemplo, selecione o tamanho amostral, o coeficiente de confiança do intervalo, a média e o desvio padrão da normal.
+
+```{r echo=FALSE}
+inputPanel(
+  selectInput("gamma2",label = "Escolha gamma:",choices = c(0.90,0.95,0.99), selected = 0.95),
+  
+  selectInput("n2", label = "Escolha tamanho amostral",choices = c(10,20,30,50,100,1000,10000) ,selected = 10),
+  
+  textInput("mu", label = "Média da Normal", value = 0),
+  
+  textInput("sigma", label = "Desvio padrão da Normal", value = 50)
+)
+```
+
+Para esses valores, temos as seguintes larguras:
+
+```{r echo=FALSE}
+renderPrint(
+  print(larg(as.integer(input$n2),as.numeric(input$gamma2),as.numeric(input$mu),abs(as.numeric(input$sigma))))
+)
+```
+
+Note que ao aumentar $n$, as larguras ficam cada vez mais próximas.
+
+# Teste t para população não normal
+
+Se $X_1, X_2, \dots, X_n \sim N(\mu,\sigma^2)$, então sabemos que $T = \dfrac{\bar{X} - \mu}{S/\sqrt{n}} \sim t_{(n-1)}$.
+
+Logo, se queremos testar o seguinte: 
+
+$$\begin{aligned} H_0: & \mu = \mu_0 \\ H_1: & \mu \neq \mu_0 \end{aligned}$$ 
+
+Usamos a estatística do teste $T^* = \dfrac{\bar{X} - \mu_0}{S/\sqrt{n}}$, onde rejeitamos $H_0$ para valores extremos de $T^*$, que indicariam que a hipótese nula não é verdadeira. 
+
+Quão extremos são esses valores? 
+
+Se usarmos o valor nominal $\alpha = 0.05$, então queremos que $P_{H_0}(|T^*| > k) = \alpha$. O que nos levaria para $k = t_{(1-\alpha/2;n-1)}$, o quantil $1-\alpha/2$ da distribuição $t$ com $n-1$ g.l.
+
+Mas e se não tivessemos população normal? Vamos calcular o erro do tipo-I empírico para quando temos uma amostra de outra distribuição, testando
+
+$$\begin{aligned} H_0: & \mu = \mu_0 \\ H_1: & \mu \neq \mu_0 \end{aligned}$$ 
+
+onde $\mu_0$ é a média da distribuição que estaremos usando. 
+
+Nesse caso, vamos usar três distribuições diferentes: $\chi^2(p), U(a,b), Exp(\lambda)$.
+
+O cálculo de erro do tipo-I empírico consiste no seguinte:
+
+  1. Criar $m$ amostras de tamanho n.
+  2. Calcular estatística do teste $T^* = \dfrac{\bar{X} - \mu_0}{S/\sqrt{n}}$, onde $\mu_0$ é a esperança da distribuição amostrada.
+  3. Ver a proporção de replicatas de amostras que nós rejeitamos a hipótese nula.
+  
+Vamos então seguir esses passos para cada uma das distribuições. Definimos antes o tamanho amostral e a quantidade de amostras a serem criadas.
+
+```{r echo=FALSE}
+inputPanel(
+  textInput("n3", label = "Tamanho Amostral", value = 20),
+  
+  textInput("replicas", label = "Quantidade de amostras", value = 1000)
+)
+```
+
+
+  
+### Chi-Quadrado
+
+Primeiro, devemos determinar os graus de liberdade
+
+```{r echo=FALSE}
+inputPanel(
+  sliderInput("gl", label = "Graus de Liberdade",
+              min = 1, max = 100, value = 1, step = 4)
+)
+```
+
+Agora, a função a seguir retorna o valor empírico de $\alpha$, para os graus de liberdade escolhidos
+
+```{r}
+alpha_chi <- function(gl,n,m){
+  mu0 = gl
+  alpha = 0.05
+  tstat = replicate(m,{
+    x = rchisq(n,gl)
+    (mean(x)-mu0)/(sd(x)/sqrt(n))
+  })
+  I = abs(tstat) > qt(1-alpha/2,n-1)
+  return(mean(I))
+}
+```
+
+Logo, conseguimos o nível de significância empírico para o teste t com uma população com distribuição $\chi^2$ com os graus de liberdade escolhidos:
+
+```{r echo = FALSE}
+renderPrint(
+  print(alpha_chi(as.integer(input$gl),as.integer(input$n3),as.integer(input$replicas)))
+)
+```
+
+
+## Uniforme
+
+Os parâmetros da distribuição $Uniforme(a,b)$
+
+```{r echo=FALSE}
+inputPanel(
+  textInput("a", label = "a", value = 0),
+  
+  textInput("b", label = "b", value = 2)
+)
+```
+
+A função a seguir retorna o valor empírico de $\alpha$, para os parâmetros escolhidos
+
+```{r}
+alpha_unif <- function(a,b,n,m){
+  mu0 = (a+b)/2
+  alpha = 0.05
+  tstat = replicate(m,{
+    x = runif(n,a,b)
+    (mean(x)-mu0)/(sd(x)/sqrt(n))
+  })
+  I = abs(tstat) > qt(1-alpha/2,n-1)
+  return(mean(I))
+}
+```
+
+Logo, conseguimos o nível de significância empírico para o teste t com uma população com distribuição $Uniforme$ com os parâmetros escolhidos:
+
+```{r echo = FALSE}
+renderPrint(
+  print(alpha_unif(as.numeric(input$a),as.numeric(input$b),as.integer(input$n3),as.integer(input$replicas)))
+)
+```
+
+## Exponencial
+
+O parâmetro da distribuição $Exponencial(\lambda)$ (Com esperança $1/\lambda$)
+
+```{r echo=FALSE}
+inputPanel(
+  textInput("lambda", label = "Lambda", value = 5)
+)
+```
+
+A função a seguir retorna o valor empírico de $\alpha$, para o parâmetro escolhido
+
+```{r}
+alpha_exp <- function(lambda,n,m){
+  mu0 = 1/lambda
+  alpha = 0.05
+  tstat = replicate(m,{
+    x = rexp(n,lambda)
+    (mean(x)-mu0)/(sd(x)/sqrt(n))
+  })
+  I = abs(tstat) > qt(1-alpha/2,n-1)
+  return(mean(I))
+}
+```
+
+Logo, conseguimos o nível de significância empírico para o teste t com uma população com distribuição $Uniforme$ com o parâmetro escolhido:
+
+```{r echo = FALSE}
+renderPrint(
+  print(alpha_exp(as.numeric(input$lambda),as.integer(input$n3),as.integer(input$replicas)))
+)
+```
+
